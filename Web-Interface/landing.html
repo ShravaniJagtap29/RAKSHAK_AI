@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAKSHAKAI — Intrusion Detection System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+ 
+:root {
+  --bg:       #060810;
+  --surface:  #0c0f1a;
+  --surface2: #111526;
+  --border:   #1a1f35;
+  --accent:   #00d4ff;
+  --accent2:  #7c3aed;
+  --danger:   #ff4757;
+  --success:  #00ff88;
+  --warning:  #ffb830;
+  --text:     #e2e8f0;
+  --muted:    #4a5568;
+  --mono:     'Share Tech Mono', monospace;
+  --display:  'Orbitron', sans-serif;
+  --body:     'Rajdhani', sans-serif;
+}
+ 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+html { scroll-behavior: smooth; }
+ 
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+ 
+/* ── Grid background ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+ 
+/* ── Scan line ── */
+body::after {
+  content: '';
+  position: fixed;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.4), transparent);
+  animation: scanline 6s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+ 
+@keyframes scanline {
+  0%   { top: -2px; }
+  100% { top: 100vh; }
+}
+ 
+/* ── NAVBAR ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 60px;
+  background: rgba(6,8,16,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+ 
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+ 
+.nav-logo .shield-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  clip-path: polygon(50% 0%, 100% 20%, 100% 60%, 50% 100%, 0% 60%, 0% 20%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+ 
+.nav-logo .shield-icon::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: var(--bg);
+  clip-path: polygon(50% 0%, 100% 20%, 100% 60%, 50% 100%, 0% 60%, 0% 20%);
+}
+ 
+.nav-logo-text {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+ 
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+ 
+.nav-links a {
+  font-family: var(--body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+ 
+.nav-links a:hover { color: var(--accent); }
+ 
+.nav-cta {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent) !important;
+  padding: 8px 20px;
+  border-radius: 2px;
+  font-family: var(--mono) !important;
+  font-size: 12px !important;
+  transition: background 0.2s, color 0.2s !important;
+}
+ 
+.nav-cta:hover {
+  background: var(--accent) !important;
+  color: #000 !important;
+}
+ 
+/* ── HERO ── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 60px 80px;
+  z-index: 2;
+  overflow: hidden;
+}
+ 
+.hero-bg-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+ 
+.hero-content {
+  text-align: center;
+  max-width: 900px;
+  position: relative;
+  z-index: 2;
+}
+ 
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+ 
+.hero-eyebrow::before,
+.hero-eyebrow::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.5;
+}
+ 
+.hero-title {
+  font-family: var(--display);
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin-bottom: 8px;
+}
+ 
+.hero-title span {
+  color: var(--accent);
+  position: relative;
+}
+ 
+.hero-title span::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.4;
+}
+ 
+.hero-subtitle {
+  font-family: var(--display);
+  font-size: clamp(14px, 2vw, 18px);
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+ 
+.hero-desc {
+  font-size: 18px;
+  color: #94a3b8;
+  max-width: 600px;
+  margin: 0 auto 48px;
+  line-height: 1.7;
+  font-weight: 400;
+}
+ 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+ 
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent);
+  color: #000;
+  padding: 14px 32px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: opacity 0.2s, transform 0.1s;
+  text-transform: uppercase;
+}
+ 
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:active { transform: scale(0.98); }
+ 
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  color: var(--text);
+  padding: 14px 32px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  transition: border-color 0.2s, color 0.2s;
+  text-transform: uppercase;
+}
+ 
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+ 
+/* ── LIVE COUNTER STRIP ── */
+.counter-strip {
+  position: relative;
+  z-index: 2;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 60px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+ 
+.counter-item {
+  text-align: center;
+  padding: 0 24px;
+  border-right: 1px solid var(--border);
+}
+ 
+.counter-item:last-child { border-right: none; }
+ 
+.counter-num {
+  font-family: var(--display);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+ 
+.counter-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+ 
+/* ── SECTION BASE ── */
+section {
+  position: relative;
+  z-index: 2;
+  padding: 100px 60px;
+}
+ 
+.section-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+ 
+.section-tag::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+ 
+.section-title {
+  font-family: var(--display);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+ 
+.section-desc {
+  font-size: 17px;
+  color: #64748b;
+  max-width: 520px;
+  line-height: 1.7;
+}
+ 
+/* ── FEATURES ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 60px;
+}
+ 
+.feature-card {
+  background: var(--surface);
+  padding: 36px 32px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+ 
+.feature-card:hover { background: var(--surface2); }
+ 
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+ 
+.feature-card:hover::before { transform: scaleX(1); }
+ 
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+ 
+.feature-title {
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+  letter-spacing: 0.03em;
+}
+ 
+.feature-desc {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.65;
+}
+ 
+.feature-tag {
+  display: inline-block;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.2);
+  padding: 3px 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+ 
+/* ── TECH STACK ── */
+.tech-section {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+ 
+.tech-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+ 
+.tech-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 40px;
+  border: 1px solid var(--border);
+}
+ 
+.tech-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+ 
+.tech-row:last-child { border-bottom: none; }
+.tech-row:hover { background: rgba(0,212,255,0.03); }
+ 
+.tech-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+ 
+.tech-name {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  flex: 1;
+}
+ 
+.tech-role {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--body);
+}
+ 
+/* ── ARCHITECTURE ── */
+.arch-diagram {
+  margin-top: 60px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 40px;
+  position: relative;
+}
+ 
+.arch-diagram::before {
+  content: 'SYSTEM ARCHITECTURE';
+  position: absolute;
+  top: -10px;
+  left: 24px;
+  background: var(--surface);
+  padding: 0 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+}
+ 
+.arch-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 8px;
+}
+ 
+.arch-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 10px 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text);
+  text-align: center;
+  min-width: 120px;
+  letter-spacing: 0.05em;
+  position: relative;
+}
+ 
+.arch-box.accent {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(0,212,255,0.04);
+}
+ 
+.arch-box.purple {
+  border-color: var(--accent2);
+  color: #a78bfa;
+  background: rgba(124,58,237,0.06);
+}
+ 
+.arch-arrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+ 
+/* ── PAGES SHOWCASE ── */
+.pages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 60px;
+}
+ 
+.page-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+ 
+.page-card:hover {
+  border-color: rgba(0,212,255,0.3);
+  transform: translateY(-2px);
+}
+ 
+.page-preview {
+  height: 160px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+ 
+.preview-bar {
+  height: 8px;
+  border-radius: 1px;
+  background: var(--border);
+}
+ 
+.preview-bar.accent { background: rgba(0,212,255,0.3); width: 60%; }
+.preview-bar.short  { width: 40%; }
+.preview-bar.med    { width: 70%; }
+ 
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 4px;
+  margin-top: 4px;
+}
+ 
+.preview-cell {
+  height: 28px;
+  background: var(--surface);
+  border-radius: 1px;
+}
+ 
+.preview-cell.c { background: rgba(255,71,87,0.2); }
+.preview-cell.h { background: rgba(255,165,2,0.2); }
+.preview-cell.m { background: rgba(255,211,42,0.2); }
+.preview-cell.l { background: rgba(46,213,115,0.2); }
+ 
+.preview-table {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+ 
+.preview-tr {
+  display: flex;
+  gap: 4px;
+}
+ 
+.preview-td {
+  height: 10px;
+  background: var(--surface);
+  border-radius: 1px;
+  flex: 1;
+}
+ 
+.preview-td.ip { background: rgba(0,212,255,0.15); flex: 2; }
+ 
+.page-info {
+  padding: 16px;
+}
+ 
+.page-name {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+ 
+.page-file {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+ 
+/* ── LIVE DEMO TERMINAL ── */
+.terminal-section {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+ 
+.terminal-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+ 
+.terminal {
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: var(--mono);
+}
+ 
+.terminal-header {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+ 
+.t-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+ 
+.t-dot.r { background: #ff5f57; }
+.t-dot.y { background: #ffbd2e; }
+.t-dot.g { background: #28c940; }
+ 
+.terminal-title {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 6px;
+  letter-spacing: 0.08em;
+}
+ 
+.terminal-body {
+  padding: 20px;
+  font-size: 12px;
+  line-height: 2;
+  min-height: 280px;
+}
+ 
+.t-line { display: flex; gap: 8px; }
+.t-prompt { color: var(--success); flex-shrink: 0; }
+.t-cmd    { color: var(--text); }
+.t-out    { color: var(--muted); padding-left: 4px; }
+.t-threat { color: var(--danger); font-weight: 700; }
+.t-high   { color: var(--warning); }
+.t-ok     { color: var(--success); }
+.t-info   { color: var(--accent); }
+ 
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: var(--accent);
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+}
+ 
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+ 
+/* ── THREAT TYPES ── */
+.threats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 60px;
+}
+ 
+.threat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 24px 20px;
+  position: relative;
+  overflow: hidden;
+}
+ 
+.threat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+}
+ 
+.threat-card.c::after { background: var(--danger); }
+.threat-card.h::after { background: var(--warning); }
+.threat-card.m::after { background: #ffd32a; }
+.threat-card.l::after { background: var(--success); }
+ 
+.threat-severity {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+ 
+.threat-card.c .threat-severity { color: var(--danger); }
+.threat-card.h .threat-severity { color: var(--warning); }
+.threat-card.m .threat-severity { color: #ffd32a; }
+.threat-card.l .threat-severity { color: var(--success); }
+ 
+.threat-name {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+  letter-spacing: 0.03em;
+}
+ 
+.threat-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+ 
+/* ── INSTALL ── */
+.install-section {}
+ 
+.install-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 60px;
+}
+ 
+.install-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 32px;
+}
+ 
+.install-step {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+ 
+.install-title {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 20px;
+  letter-spacing: 0.02em;
+}
+ 
+.code-block {
+  background: #010409;
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 2;
+  color: var(--text);
+  overflow-x: auto;
+}
+ 
+.code-block .c { color: var(--muted); }
+.code-block .k { color: var(--accent); }
+.code-block .s { color: var(--success); }
+ 
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 2;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 48px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+ 
+.footer-logo {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+ 
+.footer-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.8;
+}
+ 
+.footer-stack {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+ 
+.stack-pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  letter-spacing: 0.08em;
+}
+ 
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+ 
+.fade-up {
+  animation: fadeUp 0.6s ease both;
+}
+ 
+.fade-up:nth-child(1) { animation-delay: 0.1s; }
+.fade-up:nth-child(2) { animation-delay: 0.2s; }
+.fade-up:nth-child(3) { animation-delay: 0.3s; }
+.fade-up:nth-child(4) { animation-delay: 0.4s; }
+.fade-up:nth-child(5) { animation-delay: 0.5s; }
+.fade-up:nth-child(6) { animation-delay: 0.6s; }
+ 
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  nav { padding: 16px 24px; }
+  section { padding: 70px 24px; }
+  .hero { padding: 120px 24px 60px; }
+  .counter-strip { padding: 20px 24px; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .tech-layout { grid-template-columns: 1fr; gap: 40px; }
+  .pages-grid { grid-template-columns: 1fr 1fr; }
+  .threats-grid { grid-template-columns: 1fr 1fr; }
+  .install-grid { grid-template-columns: 1fr; }
+  .terminal-layout { grid-template-columns: 1fr; }
+  footer { flex-direction: column; text-align: center; }
+  .footer-stack { justify-content: center; }
+}
+ 
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .pages-grid { grid-template-columns: 1fr; }
+  .threats-grid { grid-template-columns: 1fr 1fr; }
+  .counter-strip { grid-template-columns: 1fr 1fr; }
+  .counter-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .counter-item:nth-child(odd) { border-right: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+ 
+<!-- NAVBAR -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="shield-icon"></div>
+    <span class="nav-logo-text">RAKSHAKAI</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pages">Pages</a></li>
+    <li><a href="#threats">Detection</a></li>
+    <li><a href="#install">Setup</a></li>
+    <li><a href="http://localhost/ids/index.php" class="nav-cta">[ LAUNCH ]</a></li>
+  </ul>
+</nav>
+ 
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow fade-up">AI-POWERED INTRUSION DETECTION SYSTEM</div>
+    <h1 class="hero-title fade-up">RAKSHA<span>KAI</span></h1>
+    <p class="hero-subtitle fade-up">Protect · Detect · Respond</p>
+    <p class="hero-desc fade-up">
+      Real-time network intrusion detection powered by machine learning,
+      built on Python, PHP, and MySQL. Monitors live traffic, classifies
+      threats with AI, and alerts your team instantly.
+    </p>
+    <div class="hero-actions fade-up">
+      <a href="http://localhost/ids/index.php" class="btn-primary">
+        <span>▶</span> Launch Dashboard
+      </a>
+      <a href="http://localhost/ids/livefeed.php" class="btn-secondary">
+        <span>◉</span> Live Feed
+      </a>
+    </div>
+  </div>
+</section>
+ 
+<!-- COUNTER STRIP -->
+<div class="counter-strip">
+  <div class="counter-item">
+    <div class="counter-num" id="cnt-threats">0</div>
+    <div class="counter-label">Threats detected</div>
+  </div>
+  <div class="counter-item">
+    <div class="counter-num">8</div>
+    <div class="counter-label">Threat types</div>
+  </div>
+  <div class="counter-item">
+    <div class="counter-num">10</div>
+    <div class="counter-label">API endpoints</div>
+  </div>
+  <div class="counter-item">
+    <div class="counter-num">8</div>
+    <div class="counter-label">Dashboard pages</div>
+  </div>
+</div>
+ 
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-tag">Core capabilities</div>
+  <h2 class="section-title">Everything a real IDS needs</h2>
+  <p class="section-desc">
+    Built from scratch over 8 days using Python, PHP, MySQL, and JavaScript.
+    No third-party IDS engine — every component is custom.
+  </p>
+ 
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Real-time packet capture</div>
+      <div class="feature-desc">
+        Scapy-based packet sniffer captures live network traffic from any
+        interface. Processes packets at up to 500/sec with per-IP rate tracking.
+      </div>
+      <span class="feature-tag">capture.py · Scapy</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-title">ML anomaly detection</div>
+      <div class="feature-desc">
+        Isolation Forest model trained on normal traffic profiles. Detects
+        statistical anomalies alongside rule-based classification for 8 threat types.
+      </div>
+      <span class="feature-tag">scikit-learn · Isolation Forest</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <div class="feature-title">AI threat explanation</div>
+      <div class="feature-desc">
+        Every alert can be explained in plain English by GPT-4o-mini.
+        Tells analysts what the threat means, why it's dangerous, and what to do.
+      </div>
+      <span class="feature-tag">OpenAI GPT-4o-mini</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌍</div>
+      <div class="feature-title">Threat origin map</div>
+      <div class="feature-desc">
+        Live world map with pulsing dots at the geographic origin of each attacker.
+        Geolocation via ip-api.com with AbuseIPDB reputation scoring.
+      </div>
+      <span class="feature-tag">ip-api · AbuseIPDB</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <div class="feature-title">Instant notifications</div>
+      <div class="feature-desc">
+        Twilio SMS for critical threats. Gmail email alerts for high severity.
+        Per-threat-type cooldowns prevent notification flooding.
+      </div>
+      <span class="feature-tag">Twilio · Gmail SMTP</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Analytics & PDF reports</div>
+      <div class="feature-desc">
+        Full reporting engine with 5 Chart.js charts. Exports to PDF via
+        browser print or CSV for SIEM ingestion. Custom date ranges.
+      </div>
+      <span class="feature-tag">Chart.js · CSV · PDF</span>
+    </div>
+  </div>
+</section>
+ 
+<!-- TECH STACK -->
+<section class="tech-section" id="tech">
+  <div class="tech-layout">
+    <div>
+      <div class="section-tag">Technology</div>
+      <h2 class="section-title">Built on a real stack</h2>
+      <p class="section-desc">
+        No framework magic. Pure Python for the AI engine, PHP for the
+        web layer, MySQL for persistence, and vanilla JS for the frontend.
+        Every line is readable and modifiable.
+      </p>
+ 
+      <div class="arch-diagram">
+        <div class="arch-row">
+          <div class="arch-box accent">Network traffic</div>
+          <div class="arch-arrow">──▶</div>
+          <div class="arch-box accent">Scapy sniffer</div>
+          <div class="arch-arrow">──▶</div>
+          <div class="arch-box accent">ML engine</div>
+        </div>
+        <div class="arch-row" style="justify-content:flex-end;padding-right:0">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--muted);padding-right:16px">▼</div>
+        </div>
+        <div class="arch-row">
+          <div class="arch-box purple">PHP dashboard</div>
+          <div class="arch-arrow">◀──</div>
+          <div class="arch-box purple">Flask REST API</div>
+          <div class="arch-arrow">──▶</div>
+          <div class="arch-box">MySQL DB</div>
+        </div>
+        <div class="arch-row" style="margin-top:8px">
+          <div class="arch-box" style="flex:1;text-align:center">WebSocket → live dashboard updates</div>
+        </div>
+      </div>
+    </div>
+ 
+    <div>
+      <div class="tech-list">
+        <div class="tech-row">
+          <div class="tech-dot" style="background:#3572A5"></div>
+          <span class="tech-name">Python 3.11</span>
+          <span class="tech-role">AI engine · API · capture</span>
+        </div>
+        <div class="tech-row">
+          <div class="tech-dot" style="background:#4F5D95"></div>
+          <span class="tech-name">PHP 8.2</span>
+          <span class="tech-role">Web backend · session · proxy</span>
+        </div>
+        <div class="tech-row">
+          <div class="tech-dot" style="background:#00758F"></div>
+          <span class="tech-name">MySQL 8 (WAMP)</span>
+          <span class="tech-role">Alerts · rules · blacklist</span>
+        </div>
+        <div class="tech-row">
+          <div class="tech-dot" style="background:#F7DF1E"></div>
+          <span class="tech-name">JavaScript (Vanilla)</span>
+          <span class="tech-role">Charts · WebSocket · UI</span>
+        </div>
+        <div class="tech-row">
+          <div class="tech-dot" style="background:#FF6384"></div>
+          <span class="tech-name">Flask + Flask-SocketIO</span>
+          <span class="tech-role">REST API · real-time events</span>
+        </div>
+        <div class="tech-row">
+          <div class="tech-dot" style="background:#F77234"></div>
+          <span class="tech-name">Scapy</span>
+          <span class="tech-role">Live packet capture · analysis</span>
+        </div>
+        <div class="tech-row">
+          <div class="tech-dot" style="background:#F89820"></div>
+          <span class="tech-name">scikit-learn</span>
+          <span class="tech-role">Isolation Forest · ML model</span>
+        </div>
+        <div class="tech-row">
+          <div class="tech-dot" style="background:#74AA9C"></div>
+          <span class="tech-name">OpenAI GPT-4o-mini</span>
+          <span class="tech-role">AI threat explanation</span>
+        </div>
+        <div class="tech-row">
+          <div class="tech-dot" style="background:#FF0000"></div>
+          <span class="tech-name">Twilio · Gmail SMTP</span>
+          <span class="tech-role">SMS · email notifications</span>
+        </div>
+        <div class="tech-row" style="border-bottom:none">
+          <div class="tech-dot" style="background:#FF6B6B"></div>
+          <span class="tech-name">AbuseIPDB · ip-api</span>
+          <span class="tech-role">Threat intel · geolocation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- PAGES -->
+<section id="pages">
+  <div class="section-tag">Interface</div>
+  <h2 class="section-title">8 fully built pages</h2>
+  <p class="section-desc">
+    Every page is functional, connected to the live API, and styled
+    with the dark RAKSHAKAI theme.
+  </p>
+ 
+  <div class="pages-grid">
+    <div class="page-card">
+      <div class="page-preview">
+        <div class="preview-bar accent"></div>
+        <div class="preview-grid">
+          <div class="preview-cell c"></div>
+          <div class="preview-cell h"></div>
+          <div class="preview-cell m"></div>
+          <div class="preview-cell l"></div>
+        </div>
+        <div class="preview-table">
+          <div class="preview-tr"><div class="preview-td ip"></div><div class="preview-td"></div><div class="preview-td"></div></div>
+          <div class="preview-tr"><div class="preview-td ip"></div><div class="preview-td"></div><div class="preview-td"></div></div>
+          <div class="preview-tr"><div class="preview-td ip"></div><div class="preview-td"></div><div class="preview-td"></div></div>
+        </div>
+      </div>
+      <div class="page-info">
+        <div class="page-name">Dashboard</div>
+        <div class="page-file">index.php — live charts + alerts</div>
+      </div>
+    </div>
+ 
+    <div class="page-card">
+      <div class="page-preview" style="background:#060810">
+        <div style="display:flex;flex-direction:column;gap:5px;height:100%">
+          <div style="background:rgba(255,71,87,0.15);border-left:2px solid #ff4757;padding:6px 8px;font-family:var(--mono);font-size:9px;color:#ff4757;animation:tickerIn 0.3s ease">SYN FLOOD · 45.33.32.156</div>
+          <div style="background:rgba(255,165,2,0.1);border-left:2px solid #ffa502;padding:6px 8px;font-family:var(--mono);font-size:9px;color:#ffa502">PORT SCAN · 91.108.4.1</div>
+          <div style="background:rgba(255,71,87,0.15);border-left:2px solid #ff4757;padding:6px 8px;font-family:var(--mono);font-size:9px;color:#ff4757">C2 COMM · 185.220.101.5</div>
+          <div style="background:rgba(255,211,42,0.1);border-left:2px solid #ffd32a;padding:6px 8px;font-family:var(--mono);font-size:9px;color:#ffd32a">BRUTE FORCE · 194.165.16.10</div>
+        </div>
+      </div>
+      <div class="page-info">
+        <div class="page-name">Live feed</div>
+        <div class="page-file">livefeed.php — ticker + world map</div>
+      </div>
+    </div>
+ 
+    <div class="page-card">
+      <div class="page-preview">
+        <div class="preview-bar accent"></div>
+        <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #1a1f35">
+            <div style="width:50px;height:8px;background:rgba(0,212,255,0.2);border-radius:1px"></div>
+            <div style="width:80px;height:8px;background:#1a1f35;border-radius:1px"></div>
+            <div style="width:36px;height:14px;background:rgba(255,71,87,0.2);border-radius:2px;margin-left:auto"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #1a1f35">
+            <div style="width:50px;height:8px;background:rgba(0,212,255,0.2);border-radius:1px"></div>
+            <div style="width:60px;height:8px;background:#1a1f35;border-radius:1px"></div>
+            <div style="width:36px;height:14px;background:rgba(255,165,2,0.2);border-radius:2px;margin-left:auto"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0">
+            <div style="width:50px;height:8px;background:rgba(0,212,255,0.2);border-radius:1px"></div>
+            <div style="width:90px;height:8px;background:#1a1f35;border-radius:1px"></div>
+            <div style="width:36px;height:14px;background:rgba(255,71,87,0.2);border-radius:2px;margin-left:auto"></div>
+          </div>
+        </div>
+      </div>
+      <div class="page-info">
+        <div class="page-name">Alerts</div>
+        <div class="page-file">alerts.php — filter + CSV export</div>
+      </div>
+    </div>
+ 
+    <div class="page-card">
+      <div class="page-preview">
+        <div style="display:flex;flex-direction:column;gap:8px;padding:4px">
+          <div class="preview-bar short" style="background:rgba(255,71,87,0.3)"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="height:60px;background:var(--surface2);border:1px solid #1a1f35;padding:8px">
+              <div style="height:6px;background:rgba(0,212,255,0.2);border-radius:1px;margin-bottom:4px"></div>
+              <div style="height:6px;background:#1a1f35;border-radius:1px;width:60%"></div>
+            </div>
+            <div style="height:60px;background:var(--surface2);border:1px solid #1a1f35;padding:8px">
+              <div style="height:6px;background:rgba(255,71,87,0.3);border-radius:1px;margin-bottom:4px;width:80%"></div>
+              <div style="height:6px;background:#1a1f35;border-radius:1px;width:40%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="page-info">
+        <div class="page-name">Alert detail</div>
+        <div class="page-file">alert_detail.php — GPT explain + block</div>
+      </div>
+    </div>
+ 
+    <div class="page-card">
+      <div class="page-preview">
+        <div style="display:flex;flex-direction:column;gap:4px;padding:4px">
+          <div style="display:flex;gap:8px;align-items:center;padding:6px;background:var(--surface2)">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--success)"></div>
+            <div style="height:7px;background:rgba(0,212,255,0.15);border-radius:1px;flex:1"></div>
+            <div style="width:40px;height:16px;background:rgba(255,165,2,0.2);border-radius:2px"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;padding:6px;background:var(--surface2)">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--success)"></div>
+            <div style="height:7px;background:rgba(0,212,255,0.15);border-radius:1px;flex:1"></div>
+            <div style="width:40px;height:16px;background:rgba(255,71,87,0.2);border-radius:2px"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;padding:6px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--muted);opacity:0.4"></div>
+            <div style="height:7px;background:#1a1f35;border-radius:1px;flex:1"></div>
+            <div style="width:40px;height:16px;background:#1a1f35;border-radius:2px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="page-info">
+        <div class="page-name">Rules</div>
+        <div class="page-file">rules.php — add / toggle / delete</div>
+      </div>
+    </div>
+ 
+    <div class="page-card">
+      <div class="page-preview">
+        <div style="display:flex;flex-direction:column;gap:6px;padding:4px">
+          <div class="preview-bar" style="background:rgba(124,58,237,0.3);width:55%"></div>
+          <div style="display:flex;gap:4px;align-items:flex-end;height:70px;padding-top:10px">
+            <div style="flex:1;background:rgba(0,212,255,0.25);height:40%"></div>
+            <div style="flex:1;background:rgba(0,212,255,0.25);height:70%"></div>
+            <div style="flex:1;background:rgba(0,212,255,0.25);height:55%"></div>
+            <div style="flex:1;background:rgba(0,212,255,0.25);height:90%"></div>
+            <div style="flex:1;background:rgba(0,212,255,0.25);height:45%"></div>
+            <div style="flex:1;background:rgba(0,212,255,0.25);height:60%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="page-info">
+        <div class="page-name">Reports</div>
+        <div class="page-file">reports.php — charts + PDF + CSV</div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- TERMINAL DEMO -->
+<section class="terminal-section">
+  <div class="terminal-layout">
+    <div>
+      <div class="section-tag">Live detection</div>
+      <h2 class="section-title">Threats detected in real time</h2>
+      <p class="section-desc" style="margin-bottom:24px">
+        Run <code style="font-family:var(--mono);font-size:13px;background:var(--surface2);padding:2px 8px;color:var(--accent)">python main.py</code> and watch the engine classify every packet flowing through your network.
+      </p>
+      <p class="section-desc">
+        The ML model processes packets in under 1ms each. The background
+        enrichment queue handles slow external API calls without blocking
+        the detection pipeline.
+      </p>
+    </div>
+ 
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="t-dot r"></div>
+        <div class="t-dot y"></div>
+        <div class="t-dot g"></div>
+        <span class="terminal-title">ids-engine / main.py</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">python main.py</span></div>
+        <div class="t-line"><span class="t-out">╔══════════════════════════════════════╗</span></div>
+        <div class="t-line"><span class="t-out">║   RAKSHAKAI IDS — Starting           ║</span></div>
+        <div class="t-line"><span class="t-out">╚══════════════════════════════════════╝</span></div>
+        <div class="t-line"><span class="t-info">[Engine] Model trained on 500 samples.</span></div>
+        <div class="t-line"><span class="t-info">[Rules]  Loaded 5 rules from DB.</span></div>
+        <div class="t-line"><span class="t-ok">[API]    Online at localhost:5000</span></div>
+        <div class="t-line" style="margin-top:4px">
+          <span class="t-threat">[CRITICAL]</span>
+          <span class="t-cmd"> C2_COMMUNICATION</span>
+        </div>
+        <div class="t-line"><span class="t-out">&nbsp;&nbsp;&nbsp;from 185.220.101.5 → port 4444</span></div>
+        <div class="t-line">
+          <span class="t-high">[HIGH]&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <span class="t-cmd"> PORT_SCAN</span>
+        </div>
+        <div class="t-line"><span class="t-out">&nbsp;&nbsp;&nbsp;from 91.108.4.1 (20 ports / 10s)</span></div>
+        <div class="t-line">
+          <span class="t-threat">[CRITICAL]</span>
+          <span class="t-cmd"> SYN_FLOOD</span>
+        </div>
+        <div class="t-line"><span class="t-out">&nbsp;&nbsp;&nbsp;from 45.33.32.156 · rate: 150/s</span></div>
+        <div class="t-line"><span class="t-ok">[DB]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3 alerts stored.</span></div>
+        <div class="t-line"><span class="t-info">[WS]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Emitting to dashboard...</span></div>
+        <div class="t-line"><span class="t-prompt">$</span><span class="cursor"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- THREAT TYPES -->
+<section id="threats">
+  <div class="section-tag">Detection engine</div>
+  <h2 class="section-title">8 threat types classified</h2>
+  <p class="section-desc">
+    Rule-based and ML-based detection running in parallel.
+    Rule engine handles known patterns; Isolation Forest catches unknown anomalies.
+  </p>
+ 
+  <div class="threats-grid">
+    <div class="threat-card c">
+      <div class="threat-severity">Critical</div>
+      <div class="threat-name">C2 Communication</div>
+      <div class="threat-desc">Traffic to known command-and-control ports. Immediate block.</div>
+    </div>
+    <div class="threat-card c">
+      <div class="threat-severity">Critical</div>
+      <div class="threat-name">SYN Flood</div>
+      <div class="threat-desc">TCP SYN packets at 100+ per second from same source IP.</div>
+    </div>
+    <div class="threat-card c">
+      <div class="threat-severity">Critical</div>
+      <div class="threat-name">DoS / UDP Flood</div>
+      <div class="threat-desc">High-volume traffic designed to exhaust server resources.</div>
+    </div>
+    <div class="threat-card h">
+      <div class="threat-severity">High</div>
+      <div class="threat-name">Port Scan</div>
+      <div class="threat-desc">15+ unique destination ports from one IP within 10 seconds.</div>
+    </div>
+    <div class="threat-card h">
+      <div class="threat-severity">High</div>
+      <div class="threat-name">Brute Force</div>
+      <div class="threat-desc">Repeated authentication attempts on SSH, RDP, FTP, Telnet.</div>
+    </div>
+    <div class="threat-card h">
+      <div class="threat-severity">High</div>
+      <div class="threat-name">DNS Amplification</div>
+      <div class="threat-desc">Oversized UDP packets on port 53 used for reflection attacks.</div>
+    </div>
+    <div class="threat-card m">
+      <div class="threat-severity">Medium</div>
+      <div class="threat-name">XMAS / Null Scan</div>
+      <div class="threat-desc">TCP packets with abnormal flag combinations for stealth recon.</div>
+    </div>
+    <div class="threat-card l">
+      <div class="threat-severity">Low</div>
+      <div class="threat-name">ML Anomaly</div>
+      <div class="threat-desc">Statistical outlier detected by Isolation Forest — unknown threat.</div>
+    </div>
+  </div>
+</section>
+ 
+<!-- INSTALL -->
+<section id="install" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section-tag">Quick start</div>
+  <h2 class="section-title">Up and running in 4 steps</h2>
+  <p class="section-desc">
+    Requires WAMP Server, Python 3.11, and VS Code.
+    Full 8-day build guide available in the project docs.
+  </p>
+ 
+  <div class="install-grid">
+    <div class="install-card">
+      <div class="install-step">Step 01</div>
+      <div class="install-title">Install dependencies</div>
+      <div class="code-block">
+        <span class="c"># Install Python packages</span><br>
+        <span class="k">pip install</span> flask flask-socketio scapy<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scikit-learn pandas requests<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;python-dotenv mysql-connector<br><br>
+        <span class="c"># Start WAMP (tray icon = green)</span>
+      </div>
+    </div>
+ 
+    <div class="install-card">
+      <div class="install-step">Step 02</div>
+      <div class="install-title">Create the database</div>
+      <div class="code-block">
+        <span class="c">-- phpMyAdmin → SQL tab</span><br>
+        <span class="k">CREATE DATABASE</span> ids_db;<br>
+        <span class="c">-- Run schema.sql (6 tables)</span><br>
+        <span class="c">-- alerts, rules, blacklist,</span><br>
+        <span class="c">-- users, settings, logs</span>
+      </div>
+    </div>
+ 
+    <div class="install-card">
+      <div class="install-step">Step 03</div>
+      <div class="install-title">Configure .env</div>
+      <div class="code-block">
+        <span class="k">API_KEY</span>=ids-api-key-change-me<br>
+        <span class="k">DB_HOST</span>=localhost<br>
+        <span class="k">DB_USER</span>=root<br>
+        <span class="k">ABUSEIPDB_KEY</span>=<span class="s">your_key</span><br>
+        <span class="k">OPENAI_KEY</span>=<span class="s">sk-...</span><br>
+        <span class="k">TWILIO_SID</span>=<span class="s">AC...</span>
+      </div>
+    </div>
+ 
+    <div class="install-card">
+      <div class="install-step">Step 04</div>
+      <div class="install-title">Launch everything</div>
+      <div class="code-block">
+        <span class="c"># Start the full system</span><br>
+        <span class="k">python</span> main.py<br><br>
+        <span class="c"># Open in browser</span><br>
+        <span class="s">http://localhost/ids/</span><br><br>
+        <span class="c"># Real capture (run as Admin)</span><br>
+        <span class="k">python</span> capture.py --iface <span class="s">"Wi-Fi"</span>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">RAKSHAKAI</div>
+  <div class="footer-meta">
+    Intrusion Detection System · Built in 8 days<br>
+    Python · PHP · MySQL · JavaScript · AI
+  </div>
+  <div class="footer-stack">
+    <span class="stack-pill">Python 3.11</span>
+    <span class="stack-pill">Flask</span>
+    <span class="stack-pill">Scapy</span>
+    <span class="stack-pill">scikit-learn</span>
+    <span class="stack-pill">PHP 8.2</span>
+    <span class="stack-pill">MySQL</span>
+    <span class="stack-pill">Chart.js</span>
+    <span class="stack-pill">Socket.io</span>
+    <span class="stack-pill">GPT-4o-mini</span>
+  </div>
+</footer>
+ 
+<script>
+// Animate threat counter
+function animateCount(el, target, duration) {
+  let start = 0;
+  const step = target / (duration / 16);
+  const timer = setInterval(() => {
+    start += step;
+    if (start >= target) { el.textContent = target.toLocaleString(); clearInterval(timer); return; }
+    el.textContent = Math.floor(start).toLocaleString();
+  }, 16);
+}
+ 
+window.addEventListener('load', () => {
+  const el = document.getElementById('cnt-threats');
+  animateCount(el, 2847, 2000);
+});
+ 
+// Intersection observer for fade-up
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+ 
+document.querySelectorAll('.feature-card, .tech-row, .page-card, .threat-card, .install-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(16px)';
+  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
