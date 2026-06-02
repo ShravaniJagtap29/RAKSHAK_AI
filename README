@@ -1,0 +1,146 @@
+# RAKSHAK-AI – AI-Based Intrusion Detection System
+
+## 📖 Overview
+
+RAKSHAK-AI is an AI-powered Intrusion Detection System (IDS) developed to identify suspicious network activities and potential security threats in real time. The system combines machine learning techniques with a web-based interface to provide efficient threat monitoring, detection, and alert generation.
+
+The project was developed to strengthen skills in cybersecurity, artificial intelligence, web development, and database management while providing a practical solution for network security monitoring.
+
+---
+
+## 🚀 Features
+
+* Real-time intrusion detection
+* AI-based threat analysis
+* Suspicious activity monitoring
+* Automated alert generation
+* User-friendly web interface
+* Secure data management
+* Database integration
+* Responsive dashboard
+
+---
+
+## 🛠️ Technologies Used
+
+### Frontend
+
+* HTML5
+* CSS3
+* JavaScript
+
+### Backend
+
+* PHP
+* Python
+
+### Database
+
+* MySQL
+
+### Development Environment
+
+* WAMP Server
+* phpMyAdmin
+
+### Python Libraries
+
+* Pandas
+* NumPy
+* Scikit-learn
+* Matplotlib
+* Other supporting libraries
+
+---
+
+## 🎯 Project Objectives
+
+* Detect suspicious activities using AI techniques
+* Improve network security monitoring
+* Generate alerts for potential threats
+* Reduce manual monitoring efforts
+* Develop an intelligent intrusion detection solution
+
+---
+
+## ⚙️ Installation & Setup
+
+### Web Interface Setup
+
+1. Install WAMP Server.
+2. Copy the `Web-Interface` folder into the WAMP `www` directory.
+3. Start Apache and MySQL services.
+
+### Database Setup
+
+1. Open phpMyAdmin.
+2. Create a database named `rakshak_ai`.
+3. Import the SQL file from the `database` folder.
+
+### IDS Engine Setup
+
+1. Install Python 3.x.
+2. Install required libraries:
+
+```bash
+pip install pandas numpy scikit-learn matplotlib
+```
+
+3. Run the IDS Engine.
+4. Launch the web application through localhost.
+
+---
+
+## 📂 Repository Structure
+
+```text
+RAKSHAK-AI/
+│
+├── Web-Interface/
+├── IDS-Engine/
+├── database/
+│   └── rakshak_ai.sql
+├── screenshots/
+└── README.md
+```
+
+---
+
+## 📸 Screenshots
+
+Add screenshots of:
+
+* Login Page
+* Dashboard
+* Threat Detection Results
+* Alert Generation Screen
+* Reports & Analytics
+
+Store all images inside the `screenshots` folder.
+
+---
+
+## 🔮 Future Enhancements
+
+* Deep Learning-Based Threat Detection
+* Email & SMS Alerts
+* Cloud Deployment
+* Advanced Analytics Dashboard
+* Real-Time Traffic Monitoring
+* Multi-User Access Control
+* Threat Visualization Reports
+
+---
+
+## 👩‍💻 Author
+
+**Shravani Jagtap**
+
+* LinkedIn: https://linkedin.com/in/shravani2909
+* GitHub: https://github.com/ShravaniJagtap29
+
+---
+
+## 📄 License
+
+This project is developed for educational, academic, and portfolio purposes.
